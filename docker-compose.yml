@@ -1,0 +1,57 @@
+version: '3'
+services:
+  redis:
+    image: redis:7.2.2
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    logging:
+      driver: local
+
+  webserver:
+    image: caddy:2.7.5
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - client_dist:/client
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: local
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS}
+
+  event-publisher:
+    build:
+      context: server
+      dockerfile: Publisher.Dockerfile
+    environment:
+      PUBSUB_REDIS_IP: redis
+    env_file:
+      - .api.env
+    logging:
+      driver: local
+    depends_on: [ redis ]
+    restart: on-failure
+
+  api:
+    build:
+      context: server
+      dockerfile: Api.Dockerfile
+    environment:
+      PUBSUB_REDIS_IP: redis
+    logging:
+      driver: local
+    depends_on: [ redis ]
+    restart: on-failure
+
+
+volumes:
+  redisdata:
+  caddy_data:
+    external: true
+  caddy_config:
+  client_dist:

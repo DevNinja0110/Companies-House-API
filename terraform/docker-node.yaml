@@ -1,0 +1,42 @@
+#cloud-config
+
+package_update: true
+
+bootcmd:
+  - curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash - # for nodejs
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg # for docker
+  - |
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+
+write_files:
+  - path: /app/docker-compose.yaml
+    permissions: '0755'
+    content: |
+      version: '3'
+      services:
+        event-listener:
+          build: 
+            context: server
+            dockerfile: Dockerfile
+          command: npm run ${npm_command}
+          restart: unless-stopped
+          env_file: 
+            - .redis.env
+            - .api.env
+          ports:
+            - "80:80"
+
+runcmd:
+  - cd /app
+  - echo "PUBSUB_REDIS_IP=${pubsub_redis_ip}" > .redis.env
+  - echo "PUBSUB_REDIS_PASS=\"${redis_password}\"" >> .redis.env
+  - docker compose up -d
+

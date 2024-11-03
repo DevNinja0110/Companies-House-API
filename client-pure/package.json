@@ -1,0 +1,25 @@
+{
+  "name": "client-pure",
+  "version": "1.0.0",
+  "author": "Brian Evans",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "sass": "^1.76.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  },
+  "dependencies": {
+    "@orama/orama": "2.0.17",
+    "change-case": "^5.4.4",
+    "copy-to-clipboard": "^3.3.3",
+    "echarts": "^5.5.0",
+    "quicktype-core": "^23.0.158",
+    "string-template": "^1.0.0",
+    "title-case": "^4.3.1"
+  }
+}
